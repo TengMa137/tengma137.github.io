@@ -32,6 +32,9 @@ Machine Learning
 [LLMs Inference speed up EP1 - kv cache](/posts/2024-5-30-kvcache/)
 <br>
 
+[LLM Compression](/posts/2025-7-28-compressllm/)
+<br>
+
 <!-- [LLM Agent - tool/function calling/MCP](/posts/2023-12-31-vae/)
 <br>
 
