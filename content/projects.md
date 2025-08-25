@@ -135,7 +135,7 @@ How do we teach a computer to see and understand the world in 3D? By using multi
 
 <details><summary> Key takeaways</summary>
   
-- Engineered a multi-stage 3D reconstruction pipeline in C++, encompassing data preprocessing, feature extraction, and coarse-to-fine registration.
+- Engineered a multi-stage 3D point cloud registration pipeline in C++, encompassing data preprocessing, feature extraction, and coarse-to-fine registration.
 
 - Implemented and evaluated various keypoint detection and descriptor algorithms, including ISS3D and SIFT3D, to identify unique geometric features in complex point cloud data.
 
