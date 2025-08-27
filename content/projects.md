@@ -24,7 +24,7 @@ Powerful LLMs should not be confined to data centers. To truly democratize AI, t
 </details>
 
   **Technologies:** C/C++, Python, LLM inference, model compression. <br>
-  More to read regarding LLM inference [LLMsys](/posts/2025-8-18-llmsys/), [LLM compression](/posts/2025-7-28-compressllm/), [kv cache](/posts/2025-5-30-kvcache/)
+  More to read regarding LLM inference [LLMsys](/posts/2025-8-18-llmsys/), [LLM compression](/posts/2025-7-28-compressllm/), [kv cache](/posts/2025-5-30-kvcache/) and [myprune](/posts/2025-8-28-myprune/) designed by myself.
 
 
 ---
