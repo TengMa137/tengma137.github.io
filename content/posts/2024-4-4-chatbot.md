@@ -102,7 +102,7 @@ Here load_llm is a wrapper of LlamaCpp, _clear_ram is a callback function, calle
 Restore and clean chat history
 ------
 
-After setting up LLMchains, as [last blog](https://tengma137.github.io/posts/2023/04/chatbot/) shows, the chatbot is ready to go. While I want to keep the chat history in case that I want to continue the chat some other day, I save all history in txt files ordered by the time they are generated, and set a select box to choose which chat to continue. To recognize the chats easier, I name these txt files after the content of the first question, summarized by LLMs. 
+After setting up LLMchains, the chatbot is ready to go. While I want to keep the chat history in case that I want to continue the chat some other day, I save all history in txt files ordered by the time they are generated, and set a select box to choose which chat to continue. To recognize the chats easier, I name these txt files after the content of the first question, summarized by LLMs. 
 
 Moreover, facilitated by vector similarity search, I use VectorStoreRetrieverMemory to enhance the chatbot, so it only remembers pieces of history that relevant to the input question. It's optional to decide whether or not to remember the chat history, click clear to remove chat history from memory and save current memory as history, click restore to show the history on screen.
 

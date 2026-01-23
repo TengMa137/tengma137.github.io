@@ -38,11 +38,8 @@ Machine Learning
 [LLMs Inference speed up EP2 - A system perspective](/posts/2025-8-18-llmsys/)
 <br>
 
-<!-- [LLM Agent - tool/function calling/MCP](/posts/2023-12-31-vae/)
+[AI Agents for Production - lessons learned](/posts/2025-12-30-agentsystem/)
 <br>
-
-[Retrieval-Augmented Generation](/posts/2023-12-31-vae/)
-<br> -->
 
 </details>
 <br>
