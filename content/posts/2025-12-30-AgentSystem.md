@@ -1,127 +1,110 @@
 ---
-title: 'AI Agents for Production - lessons learned'
+title: 'Designing AI Agent Systems Under Real-World Constraints'
 date: 2025-12-30
 tags:
-  - Agent system
-  - AI in prodcution
+  - Agent systems
+  - AI systems
 ---
 
-Over the past year, I’ve seen a lot of impressive AI agent demos, also built some for personal use. They reason, call tools, coordinate with other agents. Most of them look great in a notebook or a recorded demo. Very few survive their first few weeks in production.
+Over the past year I’ve seen many impressive AI agent demos, and built a few myself. They reason, call tools, and coordinate with other agents. Most of them work well in notebooks or recorded demos.
 
-This post isn’t a checklist or a guide. It’s a reflection on what I’ve learned while trying to run AI agents as real systems in production, not experiments.
+Very few hold up once they become part of a real system.
 
-
-
-## The Difference Between “It Works” and “It Holds Up”
-
-When people talk about AI agents, the conversation usually starts with prompts, tools, memory, or reasoning loops. Those things matter, but they’re rarely what decides success or failure once users show up.
-
-In production, the questions shift. You start worrying about where the data comes from, how often it changes, and what happens when the model is slow, expensive, or simply wrong. You discover that most failures aren’t dramatic, they’re subtle, recurring, and hard to explain.
-
-I’ve rarely seen a system fail because the prompt was bad. I’ve seen many fail because nobody thought carefully about the system surrounding the model.
+This post isn’t a guide or checklist. It’s a reflection on what I’ve learned while trying to run agent-based systems under real-world constraints rather than controlled experiments.
 
 
-## Designing the System Changes Everything
+### The Gap Between “Working” and “Holding Up”
 
-One of the biggest shifts in how I think about agents was moving away from asking how “smart” an agent is and toward asking how the system behaves end-to-end.
+Discussions about AI agents often start with prompts, tools, memory, or reasoning loops. Those pieces matter, but they’re rarely what determines whether a system survives real usage.
 
-A production agent isn’t an LLM call. It’s a pipeline that starts long before inference and continues long after a response is generated. Data has to be ingested, transformed, stored, retrieved, and served reliably. Each step introduces its own constraints and failure modes.
+Once users arrive, the questions change.  
+Where does the data come from? How often does it change? What happens when the model is slow, expensive, or simply wrong?
 
-In one project, the agent logic itself was solid. The real issue was upstream: embeddings were being regenerated far more often than expected. Cold starts became common, latency spiked, and a small schema change triggered a full reprocessing job. Nothing about the agent reasoning was wrong, but the system design made it unusable at scale.
-
-That experience changed how I approach new projects. Most production problems show up before the model ever sees a token.
-
-## Cost and Latency Are Design Inputs, Not Afterthoughts
-
-In demos, cost is invisible. In production, it becomes impossible to ignore.
-
-Token usage accumulates faster than intuition suggests. A slightly longer prompt here, an extra tool call there, and suddenly the system is both slow and expensive. Bigger models can improve quality, but only until latency becomes unacceptable. More reasoning steps can help, but they compound unpredictably.
-
-There isn’t a single correct tradeoff, but there is a wrong approach: not thinking about tradeoffs at all. Estimating cost before shipping, separating latency-sensitive paths from offline processing, and being intentional about caching made a bigger difference for me than any prompt tweak.
-
-From a leadership perspective, unpredictability turns into risk. From an engineering perspective, it usually turns into rushed rewrites.
+Most failures aren’t dramatic. They’re subtle, recurring, and hard to explain. I’ve seen many fail because the surrounding system wasn’t designed carefully.
 
 
-## Sometimes the Best Agent Uses Fewer Models
+### System Design Matters More Than Agent Intelligence
+
+One shift that changed how I approach agents was moving from asking *how smart the agent is* to asking *how the whole system behaves*.
+
+An agent system is rarely just an LLM call. It’s a pipeline that starts long before inference and continues after a response is generated. Data needs to be ingested, transformed, stored, retrieved, and served reliably. Each stage introduces its own constraints.
+
+In one project, the agent logic worked well. The problem appeared upstream: embeddings were regenerated far more frequently than expected. Cold starts became common, latency spiked, and a small schema change triggered a full reprocessing job. Nothing was wrong with the reasoning loop. The system around it simply wasn’t designed for the workload.
+
+That experience reshaped how I think about agent systems.  
+Most problems appear before the model ever sees a token.
+
+
+### Cost and Latency Are Design Inputs
+
+In demos, cost is invisible. In real systems, it quickly becomes impossible to ignore.
+
+Token usage accumulates faster than intuition suggests. A slightly longer prompt, an additional tool call, and the system becomes both slower and more expensive. Larger models may improve quality, but only until latency becomes unacceptable. Additional reasoning steps may help, but they also compound unpredictably.
+
+There isn’t a single correct tradeoff, but ignoring the tradeoff entirely is usually the mistake.
+
+Estimating cost early, separating latency-sensitive paths from offline work, and being intentional about caching often mattered more than prompt tweaks.
+
+
+### Sometimes the Best Agent Uses Fewer Models
 
 One uncomfortable realization I’ve had more than once is that some problems don’t need an agent at all.
 
-Some of the most stable systems I’ve worked on leaned heavily on classical information retrieval, deterministic ranking, and simple heuristics. LLMs were used sparingly, often only at the final step where language generation actually added value.
+Some of the most stable systems I’ve seen and worked with relied heavily on classical information retrieval, deterministic ranking, and simple heuristics. LLMs were used sparingly, often only at the final step where language generation actually added value, e.g. replacing a multi-step agent loop with structured retrieval followed by a constrained generation step reduced both cost and latency, and the system became much easier to debug.
 
-In one case, replacing a multi-step agent loop with structured retrieval followed by a single constrained generation reduced cost and latency significantly. Users reported better results, not worse. The system became easier to debug and easier to evolve.
-
-LLMs are powerful tools, but production systems benefit from restraint. Predictability often matters more than cleverness.
+LLMs are powerful tools. Production systems often benefit from restraint.
 
 
-## Data Work Dominates Everything Else
+### Data Work Dominates Everything Else
 
 Fine-tuning sounds exciting. Dataset construction rarely does.
 
-In practice, user behavior is noisy, feedback is biased, and logs are incomplete. Before any training begins, there’s a long stretch of work that involves defining what “good” even means and deciding which failures are worth optimizing for.
+User behavior is noisy, feedback is biased, and logs are incomplete. Before any training begins, there is usually a long phase of defining what “good” even means and deciding which failures matter.
 
-When fine-tuning does make sense, it introduces a new set of production concerns. Models need to be served reliably, compared against previous versions, and rolled back when things go wrong. This is where MLOps stops being optional, even in LLM-heavy systems.
+When fine-tuning is introduced, it also adds operational complexity: models must be served reliably, compared against previous versions, and rolled back when necessary.
 
-The hard part isn’t training. It’s trusting the data enough to act on it.
-
-
-## Observability Is What Turns Guessing Into Learning
-
-One of the most painful lessons I’ve learned is that without observability, teams end up guessing. Was the failure caused by retrieval? By the prompt? By the model? By the data changing underneath?
-
-Production systems need visibility into latency, cost, retrieval quality, outputs, and user feedback - not to chase perfect metrics, but to understand reality. When something breaks, you want to know where and why, not speculate.
-
-If you can’t explain a failure, you can’t fix it. And you definitely can’t scale the system. In another system, I shipped a small prompt change that tested well offline. Nothing crashed after the rollout. Latency stayed flat. Costs didn’t spike. It looked like a harmless improvement, but its not. It turned out the change subtly increased fallback behavior under specific input patterns. Without tracing or structured output metrics, I couldn’t immediately tell whether the issue was retrieval, prompting, or the model itself. The system was “working,” but it had stopped telling us when quality degraded.
+The difficult part isn’t training. It’s trusting the data enough to act on it.
 
 
+### Observability Turns Guessing Into Learning
 
-## Change Is Inevitable - Make It Safe
+Without observability, teams end up guessing.
 
-Another thing I underestimated early on was how hard it is to change AI systems safely.
+Was a failure caused by retrieval? By prompting? By the model? Or by the underlying data changing?
 
-Prompts evolve. Models get replaced. Embeddings need to be regenerated. Retrieval logic improves. Every one of those changes can silently degrade user experience if it’s rolled out carelessly.
+Real systems need visibility into latency, cost, retrieval quality, outputs, and user feedback. Not to chase perfect metrics, but to understand what is actually happening. In my local agent project, I made a prompt change that looked harmless. Latency and costs stayed stable, but the change subtly increased fallback behavior for certain inputs. Without tracing and structured output metrics, it took time to understand what had happened.
 
-The ability to deploy gradually, compare versions, and roll back quickly often matters more than the improvement itself. In production, undoing a change is sometimes the most important feature you have.
-
-
-## Determinism Is Underrated
-
-At first, I accepted non-determinism in LLM driven Agent system as a given. Over time, I started treating determinism as a design goal.
-
-That doesn’t mean eliminating creativity entirely. It means being deliberate about where variability is allowed and where it isn’t. Critical paths benefit from constrained outputs, versioned prompts, and predictable behavior. Creative generation can live at the edges.
-
-The closer a component is to core functionality, the less freedom it should have.
+The system was still “working”, but it had stopped telling us when quality degraded.
 
 
-## Real Users Will Surprise You
+### Change Is Inevitable — Make It Safe
 
-Once a system is live, users will interact with it in ways you didn’t anticipate. Some will push boundaries accidentally. Others will do it on purpose.
-
-Prompt injection, malformed inputs, and unexpected usage patterns aren’t edge cases, they’re normal. Handling them isn’t just about security; it’s about reliability. Guardrails and validation are part of making the system trustworthy, not bureaucratic overhead.
+AI systems evolve constantly. Prompts change, models are replaced, embeddings are regenerated, and retrieval logic improves. Each of these changes can silently degrade user experience if rolled out carelessly. The ability to deploy gradually, compare versions, and roll back quickly often matters more than the improvement itself.
 
 
-## Humans Never Fully Disappear
+### Determinism Is Underrated
 
-Even systems designed to be fully automated end up involving people. Someone reviews failures, handles escalations, or corrects outputs. Designing those human touchpoints intentionally is far better than discovering them during an incident.
+Early on, I accepted non-determinism in LLM systems as unavoidable. Over time, I started treating determinism as a design goal. That doesn’t mean removing creativity. It means deciding carefully where variability belongs.
 
-Ignoring this reality doesn’t remove humans from the loop. It just makes their involvement chaotic.
+Core system paths benefit from constrained outputs, versioned prompts, and predictable behavior. Creative generation can live at the edges. The closer a component is to core functionality, the less freedom it should have.
 
 
-## Production Is a Long Game
+### Users Will Surprise You
 
-One last lesson I wish I’d learned earlier: AI systems decay.
+Once a system is live, people will use it in ways you didn’t expect. Prompt injection, malformed inputs, and unusual usage patterns are normal, not edge cases. Guardrails and validation aren’t bureaucratic overhead — they’re part of building a reliable system.
 
-Data drifts. User expectations change. Prompts accumulate complexity. Edge cases multiply. A system that can’t evolve safely eventually becomes brittle, no matter how impressive it was at launch.
 
-Shipping is only the beginning. Surviving change is the real challenge.
+### Humans Never Fully Disappear
 
-The most effective engineers constantly asking what happens when something breaks, how we know it’s working, and whether we can change it safely months from now.
+Even highly automated systems involve people somewhere in the loop. Someone reviews failures, handles escalations, or corrects outputs.
 
-AI agents are easy to build.
-Resilient AI systems are hard to operate.
+Designing those human touchpoints intentionally is far better than discovering them during an incident.
 
----
 
-In the next post, I’ll share my thoughts on how to choose between agent frameworks, RAG approaches and context engineering, and when each approach actually makes sense in production.
+### Building AI Systems Is a Long Game
 
-Tools change quickly.
-Production constraints don’t.
+AI systems change over time. Data drifts, user expectations evolve, and edge cases accumulate.
+
+A system that can’t evolve safely eventually becomes brittle, no matter how impressive it looked at launch. Shipping is only the beginning. The real challenge is operating and evolving the system over time.
+
+Building an AI agent is easy. Building a resilient AI system is much harder.
