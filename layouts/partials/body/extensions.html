@@ -1,0 +1,12 @@
+{{/*
+  Load Mermaid for fenced ```mermaid code blocks.
+  The hugo-coder theme already handles the {{< mermaid >}} shortcode in baseof.html;
+  this local extension covers Markdown fences rendered by the code block hook.
+*/}}
+{{- if and (not (.HasShortcode "mermaid")) (findRE `class="mermaid"` .Content 1) }}
+<script src="https://cdn.jsdelivr.net/npm/mermaid@9.3.0/dist/mermaid.min.js"
+  integrity="sha256-QdTG1YTLLTwD3b95jLqFxpQX9uYuJMNAtVZgwKX4oYU=" crossorigin="anonymous"></script>
+<script>
+  mermaid.initialize({ startOnLoad: true });
+</script>
+{{- end }}
